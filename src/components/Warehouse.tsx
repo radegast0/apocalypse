@@ -101,10 +101,10 @@ type GLTFResult = GLTF & {
     wall_concrete: THREE.MeshStandardMaterial;
     Blue: THREE.MeshStandardMaterial;
     metal_black: THREE.MeshStandardMaterial;
-    metal_grey_light: THREE.MeshStandardMaterial;
+    // metal_grey_light: THREE.MeshStandardMaterial;
     material: THREE.MeshStandardMaterial;
     sticker_yellow: THREE.MeshStandardMaterial;
-    brown_light_3: THREE.MeshStandardMaterial;
+    // brown_light_3: THREE.MeshStandardMaterial;
     light_brown: THREE.MeshStandardMaterial;
     white_real: THREE.MeshStandardMaterial;
     Red_dark: THREE.MeshStandardMaterial;
@@ -121,9 +121,9 @@ type GLTFResult = GLTF & {
     Book_red: THREE.MeshStandardMaterial;
     Red_2: THREE.MeshStandardMaterial;
     brown: THREE.MeshStandardMaterial;
-    brown_light_2: THREE.MeshStandardMaterial;
+    // brown_light_2: THREE.MeshStandardMaterial;
     Green_dark: THREE.MeshStandardMaterial;
-    brown_light: THREE.MeshStandardMaterial;
+    // brown_light: THREE.MeshStandardMaterial;
     dark_brown: THREE.MeshStandardMaterial;
     box_ammo_9mm: THREE.MeshStandardMaterial;
     box_ammo_9mm_piercing: THREE.MeshStandardMaterial;
@@ -148,18 +148,18 @@ type GLTFResult = GLTF & {
     beanz_green: THREE.MeshStandardMaterial;
     clock_face_analog: THREE.MeshStandardMaterial;
     Code_lock: THREE.MeshStandardMaterial;
-    Green_light_emission: THREE.MeshStandardMaterial;
+    // Green_light_emission: THREE.MeshStandardMaterial;
     Comix_book: THREE.MeshStandardMaterial;
     material_74: THREE.MeshStandardMaterial;
     Cutting_board: THREE.MeshPhysicalMaterial;
     Clock_face: THREE.MeshStandardMaterial;
-    Green_light: THREE.MeshStandardMaterial;
+    // Green_light: THREE.MeshStandardMaterial;
     Floor_concrete: THREE.MeshPhysicalMaterial;
     yellow_emmission_abajour: THREE.MeshStandardMaterial;
     yellow: THREE.MeshStandardMaterial;
-    white_emission: THREE.MeshStandardMaterial;
-    sticker_yellow_light: THREE.MeshStandardMaterial;
-    yellow_emission: THREE.MeshStandardMaterial;
+    // white_emission: THREE.MeshStandardMaterial;
+    // sticker_yellow_light: THREE.MeshStandardMaterial;
+    // yellow_emission: THREE.MeshStandardMaterial;
     magazine_prettygirl: THREE.MeshStandardMaterial;
     material_51: THREE.MeshStandardMaterial;
     Plate: THREE.MeshStandardMaterial;
@@ -198,258 +198,373 @@ export default function Warehouse(props: JSX.IntrinsicElements["group"]) {
         scale={0.006}
       >
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_1.geometry}
           material={materials.wall_concrete}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_2.geometry}
           material={materials.Blue}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_3.geometry}
           material={materials.metal_black}
         />
-        <mesh
+        {/* <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_4.geometry}
           material={materials.metal_grey_light}
-        />
+        /> */}
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_5.geometry}
           material={materials.material}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_6.geometry}
           material={materials.sticker_yellow}
         />
-        <mesh
+        {/* <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_7.geometry}
           material={materials.brown_light_3}
-        />
+        /> */}
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_8.geometry}
           material={materials.light_brown}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_9.geometry}
           material={materials.white_real}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_10.geometry}
           material={materials.Red_dark}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_11.geometry}
           material={materials.light_blue_2}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_12.geometry}
           material={materials.metal_grey_dark}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_13.geometry}
           material={materials.metal_grey}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_14.geometry}
           material={materials.light_blue}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_15.geometry}
           material={materials.Green}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_16.geometry}
           material={materials.Blue_dark}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_17.geometry}
           material={materials.Book_blue}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_18.geometry}
           material={materials.Comix_book_2}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_19.geometry}
           material={materials.Book_green}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_20.geometry}
           material={materials.Book_grey}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_21.geometry}
           material={materials.Book_red}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_22.geometry}
           material={materials.Red_2}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_23.geometry}
           material={materials.brown}
         />
-        <mesh
+        {/* <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_24.geometry}
           material={materials.brown_light_2}
-        />
+        /> */}
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_25.geometry}
           material={materials.Green_dark}
         />
-        <mesh
+        {/* <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_26.geometry}
           material={materials.brown_light}
-        />
+        /> */}
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_27.geometry}
           material={materials.dark_brown}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_28.geometry}
           material={materials.box_ammo_9mm}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_29.geometry}
           material={materials.box_ammo_9mm_piercing}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_30.geometry}
           material={materials.orange_contrst}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_31.geometry}
           material={materials.box_cardboard_big_closed}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_32.geometry}
           material={materials.box_cardboard_big_opened}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_33.geometry}
           material={materials.tincan_metal}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_34.geometry}
           material={materials.box_cardboard_medium_closed}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_35.geometry}
           material={materials.beanz_blue}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_36.geometry}
           material={materials.box_cardboard_medium_opened}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_37.geometry}
           material={materials.sticker_white}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_38.geometry}
           material={materials.beanz_red}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_39.geometry}
           material={materials.Blue_2}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_40.geometry}
           material={materials.Kitchen_cabinet_02}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_41.geometry}
           material={materials.glass}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_42.geometry}
           material={materials.Calendear}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_43.geometry}
           material={materials.Campbell_CreamOfBroccoli}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_44.geometry}
           material={materials.Campbell_CreamOfCelery}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_45.geometry}
           material={materials.Campbell_soup}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_46.geometry}
           material={materials.beanz_yellow}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_47.geometry}
           material={materials.Orange}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_48.geometry}
           material={materials.beanz_green}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_49.geometry}
           material={materials.clock_face_analog}
         />
         <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_50.geometry}
           material={materials.Code_lock}
         />
-        <mesh
+        {/* <mesh
+          castShadow
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_51.geometry}
           material={materials.Green_light_emission}
-        />
+        /> */}
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_52.geometry}
           material={materials.Comix_book}
         />
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_53.geometry}
           material={materials.material_74}
         />
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_54.geometry}
           material={materials.Cutting_board}
         />
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_55.geometry}
           material={materials.Clock_face}
         />
-        <mesh
+        {/* <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_56.geometry}
           material={materials.Green_light}
-        />
+        /> */}
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_57.geometry}
           material={materials.Floor_concrete}
         />
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_58.geometry}
           material={materials.yellow_emmission_abajour}
         />
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_59.geometry}
           material={materials.yellow}
         />
-        <mesh
+        {/* <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_60.geometry}
           material={materials.white_emission}
-        />
-        <mesh
+        /> */}
+        {/* <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_61.geometry}
           material={materials.sticker_yellow_light}
-        />
-        <mesh
+        /> */}
+        {/* <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_62.geometry}
           material={materials.yellow_emission}
-        />
+        /> */}
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_63.geometry}
           material={materials.magazine_prettygirl}
         />
         <mesh
+          receiveShadow
           geometry={nodes.Wall020_wall_concrete__0001_64.geometry}
           material={materials.material_51}
         />
