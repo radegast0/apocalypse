@@ -4,8 +4,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 
 type Props = {
   target: React.RefObject<THREE.Object3D | null>;
-  fadeOpacity?: number; // target opacity when occluding
-  fadeSpeed?: number; // higher = faster fade
+  fadeOpacity?: number; // target opacity when occluding 
+  fadeSpeed?: number; // higher = faster fade 
 };
 
 function isDescendantOf(obj: THREE.Object3D, ancestor: THREE.Object3D) {
