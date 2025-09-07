@@ -4,8 +4,8 @@ import { useFrame, useThree } from "@react-three/fiber";
 
 type Props = {
   target: React.RefObject<THREE.Object3D | null>;
-  fadeOpacity?: number; // target opacity when occluding 
-  fadeSpeed?: number; // higher = faster fade 
+  fadeOpacity?: number; // target opacity when occluding
+  fadeSpeed?: number; // higher = faster fade
 };
 
 function isDescendantOf(obj: THREE.Object3D, ancestor: THREE.Object3D) {
@@ -17,7 +17,11 @@ function isDescendantOf(obj: THREE.Object3D, ancestor: THREE.Object3D) {
   return false;
 }
 
-export default function OcclusionFader({ target, fadeOpacity = 0.12, fadeSpeed = 6 }: Props) {
+export default function OcclusionFader({
+  target,
+  fadeOpacity = 0.12,
+  fadeSpeed = 6,
+}: Props) {
   const { camera, scene } = useThree();
   const raycaster = useRef(new THREE.Raycaster());
   const tracked = useRef(
@@ -25,7 +29,11 @@ export default function OcclusionFader({ target, fadeOpacity = 0.12, fadeSpeed =
       THREE.Mesh,
       {
         targetOpacity: number;
-        original?: { transparent: boolean; opacity: number; depthWrite: boolean };
+        original?: {
+          transparent: boolean;
+          opacity: number;
+          depthWrite: boolean;
+        };
       }
     >()
   );
@@ -93,9 +101,14 @@ export default function OcclusionFader({ target, fadeOpacity = 0.12, fadeSpeed =
       // Ensure blending enabled while fading
       mat.transparent = true;
       // Lerp toward target opacity
-      mat.opacity = THREE.MathUtils.lerp(mat.opacity ?? 1, entry.targetOpacity, lerpA);
+      mat.opacity = THREE.MathUtils.lerp(
+        mat.opacity ?? 1,
+        entry.targetOpacity,
+        lerpA
+      );
       // Disable depthWrite while faded so the character remains visible
-      mat.depthWrite = mat.opacity >= 0.99 ? (entry.original?.depthWrite ?? true) : false;
+      mat.depthWrite =
+        mat.opacity >= 0.99 ? entry.original?.depthWrite ?? true : false;
 
       // When fully restored, clean up and restore original flags
       if (entry.targetOpacity === 1 && mat.opacity >= 0.99) {
