@@ -64,7 +64,6 @@ export default function OcclusionFader({
       occludingMeshes.add(obj);
     }
 
-    // Update target opacities based on occlusion this frame
     occludingMeshes.forEach((mesh) => {
       const entry = tracked.current.get(mesh) || { targetOpacity: 1 };
       entry.targetOpacity = fadeOpacity;
