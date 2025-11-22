@@ -21,17 +21,20 @@ type GLTFResult = {
 }
 
 export default function SceneryContainers(props: JSX.IntrinsicElements['group']) {
-  const { nodes, materials } = useGLTF('/containers.glb') as unknown as GLTFResult
+  const { nodes, materials } = useGLTF('/containers-transformed.glb') as unknown as GLTFResult
+
+  const standardGeo = nodes['container-green'].geometry
+  const grayGeo = nodes['container-gray'].geometry
 
   const types = useMemo(
     () => [
-      { id: 'green', geo: nodes['container-green'].geometry, mat: materials.create1 },
-      { id: 'white', geo: nodes['container-white'].geometry, mat: materials.create2 },
-      { id: 'red', geo: nodes['container-red'].geometry, mat: materials.create3 },
-      { id: 'blue', geo: nodes['container-blue'].geometry, mat: materials.create5 },
-      { id: 'gray', geo: nodes['container-gray'].geometry, mat: materials.create4 },
+      { id: 'green', geo: standardGeo, mat: materials.create1 },
+      { id: 'white', geo: standardGeo, mat: materials.create2 },
+      { id: 'red', geo: standardGeo, mat: materials.create3 },
+      { id: 'blue', geo: standardGeo, mat: materials.create5 },
+      { id: 'gray', geo: grayGeo, mat: materials.create4 },
     ],
-    [nodes, materials]
+    [materials, standardGeo, grayGeo]
   )
 
   const instancesData = useMemo(() => {
@@ -136,4 +139,4 @@ function RenderInstance({ geo, mat, matrices }: { geo: any; mat: any; matrices: 
   return <instancedMesh ref={meshRef} args={[geo, mat, matrices.length]} castShadow receiveShadow />
 }
 
-useGLTF.preload('/containers.glb')
+useGLTF.preload('/containers-transformed.glb')
