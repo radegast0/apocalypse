@@ -4,13 +4,13 @@ import type { JSX } from 'react'
 
 type GLTFResult = {
   nodes: {
-    ['back-left']: THREE.Mesh
-    ['back-left001']: THREE.Mesh
+    ['back-right']: THREE.Mesh
     ['front-left']: THREE.Mesh
     ['front-right']: THREE.Mesh
+    ['back-left']: THREE.Mesh
   }
   materials: {
-    ['Scene_-_Root']: THREE.MeshStandardMaterial
+    ['Scene_-_Root.002']: THREE.MeshStandardMaterial
   }
 }
 
@@ -21,30 +21,30 @@ export default function Wheels(props: JSX.IntrinsicElements['group']) {
       <mesh
         castShadow
         receiveShadow
-        geometry={nodes['back-left'].geometry}
-        material={materials['Scene_-_Root']}
-        position={[0.235, 0.105, -0.381]}
-      />
-      <mesh
-        castShadow
-        receiveShadow
-        geometry={nodes['back-left001'].geometry}
-        material={materials['Scene_-_Root']}
-        position={[-0.244, 0.106, -0.38]}
+        geometry={nodes['back-right'].geometry}
+        material={materials['Scene_-_Root.002']}
+        position={[0.252, 0.106, 0.417]}
       />
       <mesh
         castShadow
         receiveShadow
         geometry={nodes['front-left'].geometry}
-        material={materials['Scene_-_Root']}
-        position={[0.25, 0.106, 0.531]}
+        material={materials['Scene_-_Root.002']}
+        position={[-0.252, 0.106, -0.5]}
       />
       <mesh
         castShadow
         receiveShadow
         geometry={nodes['front-right'].geometry}
-        material={materials['Scene_-_Root']}
-        position={[-0.253, 0.107, 0.544]}
+        material={materials['Scene_-_Root.002']}
+        position={[0.252, 0.106, -0.5]}
+      />
+      <mesh
+        castShadow
+        receiveShadow
+        geometry={nodes['back-left'].geometry}
+        material={materials['Scene_-_Root.002']}
+        position={[-0.252, 0.106, 0.417]}
       />
     </group>
   )
