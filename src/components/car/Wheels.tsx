@@ -23,36 +23,28 @@ export default function Wheels(props: JSX.IntrinsicElements['group']) {
         receiveShadow
         geometry={nodes['back-left'].geometry}
         material={materials['Scene_-_Root']}
-        position={[0, 0.22, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={0.03}
+        position={[0.235, 0.105, -0.381]}
       />
       <mesh
         castShadow
         receiveShadow
         geometry={nodes['back-left001'].geometry}
         material={materials['Scene_-_Root']}
-        position={[0, 0.22, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={0.03}
+        position={[-0.244, 0.106, -0.38]}
       />
       <mesh
         castShadow
         receiveShadow
         geometry={nodes['front-left'].geometry}
         material={materials['Scene_-_Root']}
-        position={[0, 0.22, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={0.03}
+        position={[0.25, 0.106, 0.531]}
       />
       <mesh
         castShadow
         receiveShadow
         geometry={nodes['front-right'].geometry}
         material={materials['Scene_-_Root']}
-        position={[0, 0.22, 0]}
-        rotation={[-Math.PI / 2, 0, 0]}
-        scale={0.03}
+        position={[-0.253, 0.107, 0.544]}
       />
     </group>
   )
