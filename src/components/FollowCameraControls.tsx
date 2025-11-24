@@ -7,7 +7,8 @@ import { useCarRigStore } from '../hooks/useCarRigStore'
 
 const MIN_CAMERA_HEIGHT = 0.5
 const MIN_TARGET_HEIGHT = 0.3
-const DETACH_THRESHOLD = 0.15
+const TARGET_DETACH_THRESHOLD = 0.15
+const CAMERA_DETACH_THRESHOLD = 0.25
 const FOLLOW_SPEED = 5
 
 export default function FollowCameraControls() {
@@ -16,6 +17,7 @@ export default function FollowCameraControls() {
   const detachedRef = useRef(false)
   const userInteractingRef = useRef(false)
   const interactionStartTarget = useRef(new Vector3())
+  const interactionStartCamera = useRef(new Vector3())
   const smoothedTarget = useRef(new Vector3(0, 0.5, 0))
   const previousTarget = useRef(new Vector3(0, 0.5, 0))
   const carPosition = useMemo(() => new Vector3(), [])
@@ -31,12 +33,14 @@ export default function FollowCameraControls() {
     const handleStart = () => {
       userInteractingRef.current = true
       interactionStartTarget.current.copy(controls.target)
+      interactionStartCamera.current.copy(controls.object.position)
     }
 
     const handleChange = () => {
       if (!userInteractingRef.current || driveInputActiveRef.current) return
-      const moved = interactionStartTarget.current.distanceTo(controls.target)
-      if (moved > DETACH_THRESHOLD) {
+      const targetDelta = interactionStartTarget.current.distanceTo(controls.target)
+      const cameraDelta = interactionStartCamera.current.distanceTo(controls.object.position)
+      if (targetDelta > TARGET_DETACH_THRESHOLD || cameraDelta > CAMERA_DETACH_THRESHOLD) {
         detachedRef.current = true
       }
     }

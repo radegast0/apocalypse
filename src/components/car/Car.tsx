@@ -1,8 +1,14 @@
 import * as THREE from 'three'
 import { useRef, useEffect, useMemo, useState, type JSX } from 'react'
-import { useFrame } from '@react-three/fiber'
 import { useGLTF, useKeyboardControls } from '@react-three/drei'
-import { RigidBody, useRapier, RapierRigidBody, CuboidCollider } from '@react-three/rapier'
+import {
+  RigidBody,
+  useRapier,
+  RapierRigidBody,
+  CuboidCollider,
+  useBeforePhysicsStep,
+  useAfterPhysicsStep,
+} from '@react-three/rapier'
 import { useControls } from 'leva'
 import { useCarRigStore } from '../../hooks/useCarRigStore'
 
@@ -157,8 +163,8 @@ export default function Car(props: CarProps) {
     wheelWidth: { value: defaultWheelWidth, min: 0.03, max: 0.4, step: 0.005 },
 
     // Traction / Drift
-    frictionSlip: { value: 40, min: 0.1, max: 40, label: 'Forward Grip (Slip)' },
-    sideFriction: { value: 1.5, min: 0.1, max: 5, label: 'Side Grip' },
+    frictionSlip: { value: 100, min: 0.1, max: 100, label: 'Forward Grip (Slip)' },
+    sideFriction: { value: 3, min: 0.1, max: 5, label: 'Side Grip' },
 
     // Visual Fixes
     meshRotateY: { value: 0, min: -180, max: 180, step: 1, label: 'Mesh Correction Y' },
@@ -233,40 +239,42 @@ export default function Car(props: CarProps) {
     console.groupEnd()
   }, [debug, wheelVisualMeta])
 
-  // Loop
-  useFrame((_, delta) => {
+  useBeforePhysicsStep(world => {
     if (!vehicleController.current || !chassisRef.current) return
-
-    const fixedDelta = Math.min(delta, 1 / 60)
 
     const { forward, backward, left, right, brake } = getKeys()
     const vehicle = vehicleController.current
+    const fixedDelta = world.integrationParameters.dt ?? 1 / 60
+    const braking = Boolean(brake)
 
     // 1. Drive
-    const force = (forward ? engineForce : backward ? -engineForce : 0) * driveDir
+    const throttle = forward ? engineForce : backward ? engineForce * 0.5 : 0
+    const direction = forward ? 1 : backward ? -1 : 0
+    const force = braking ? 0 : throttle * direction * driveDir
     for (let i = 0; i < WHEEL_SLOTS.length; i++) {
       vehicle.setWheelEngineForce(i, force)
     }
 
     // 2. Steer (Lerped)
     const targetSteer = left ? maxSteer : right ? -maxSteer : 0
-
-    // Smoothly interpolate current steering towards target steering
     currentSteeringAng.current = THREE.MathUtils.lerp(currentSteeringAng.current, targetSteer, steerSpeed * fixedDelta)
 
     WHEEL_SLOTS.forEach((slot, i) => {
-      // Apply the smoothed angle only to steering wheels
       vehicle.setWheelSteering(i, slot.steering ? currentSteeringAng.current : 0)
     })
 
     // 3. Brake
-    const b = brake ? brakeForce : 0
+    const b = braking ? brakeForce : 0
     for (let i = 0; i < WHEEL_SLOTS.length; i++) vehicle.setWheelBrake(i, b)
 
     vehicle.updateVehicle(fixedDelta)
+  })
 
-    // 4. Sync Visuals
+  useAfterPhysicsStep(() => {
+    if (!vehicleController.current) return
+    const vehicle = vehicleController.current
     const meshCorrectionRad = THREE.MathUtils.degToRad(meshRotateY)
+
     wheelsRef.forEach((ref, i) => {
       const wheelGroup = ref.current
       if (!wheelGroup) return
@@ -303,7 +311,6 @@ export default function Car(props: CarProps) {
         type="dynamic"
         position={[0, 2, 0]}
         rotation={CHASSIS_ROTATION}
-        mass={3000}
         canSleep={false}
         friction={0.5}
         linearDamping={0.5}

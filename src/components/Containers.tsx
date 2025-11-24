@@ -1,6 +1,7 @@
 import { useGLTF } from '@react-three/drei'
 import { useLayoutEffect, useMemo, useRef, type JSX } from 'react'
 import * as THREE from 'three'
+import { InstancedRigidBodies, type InstancedRigidBodyProps } from '@react-three/rapier'
 
 const CONTAINER = { w: 2.438, h: 2.591, d: 6.058 }
 
@@ -39,8 +40,16 @@ export default function SceneryContainers(props: JSX.IntrinsicElements['group'])
 
   const instancesData = useMemo(() => {
     const temp = new THREE.Object3D()
-    const data = types.map(() => [] as THREE.Matrix4[])
     const typePool = [0, 1, 2, 3, 4, 4]
+
+    // Structure: Each type has 'ground' (physics) and 'upper' (visual only) lists
+    const data = types.map(() => ({
+      ground: {
+        matrices: [] as THREE.Matrix4[],
+        instances: [] as InstancedRigidBodyProps[],
+      },
+      upper: [] as THREE.Matrix4[],
+    }))
 
     for (let d = 0; d < DEPTH_LEVELS; d++) {
       const isBarrier = d === 0
@@ -106,14 +115,27 @@ export default function SceneryContainers(props: JSX.IntrinsicElements['group'])
           const driftMax = isBarrier ? 0.02 : 0.15
 
           temp.position.set(x + randomRange(-driftMax, driftMax), y, z + randomRange(-driftMax, driftMax))
-
           temp.rotation.set(0, finalAngle + randomRange(-0.05, 0.05) + Math.PI, 0)
-
+          
           const scaleJitter = randomRange(0.995, 1.005)
           temp.scale.set(scaleJitter, scaleJitter, scaleJitter)
 
           temp.updateMatrix()
-          data[typeIdx].push(temp.matrix.clone())
+
+          // Ground level containers (h=0) get physics
+          if (h === 0) {
+            data[typeIdx].ground.matrices.push(temp.matrix.clone())
+            data[typeIdx].ground.instances.push({
+              key: `ground-${d}-${i}`,
+              position: [temp.position.x, temp.position.y, temp.position.z],
+              // FIX: Use Euler array [x,y,z] instead of Quaternion
+              rotation: [temp.rotation.x, temp.rotation.y, temp.rotation.z], 
+              scale: [temp.scale.x, temp.scale.y, temp.scale.z],
+            })
+          } else {
+            // Upper containers are visual only
+            data[typeIdx].upper.push(temp.matrix.clone())
+          }
         }
       }
     }
@@ -122,9 +144,29 @@ export default function SceneryContainers(props: JSX.IntrinsicElements['group'])
 
   return (
     <group {...props} dispose={null}>
-      {types.map((t, i) => (
-        <RenderInstance key={t.id} geo={t.geo} mat={t.mat} matrices={instancesData[i]} />
-      ))}
+      {types.map((t, i) => {
+        const { ground, upper } = instancesData[i]
+        
+        return (
+          <group key={t.id}>
+            {/* 1. Ground Level - With Physics */}
+            {ground.matrices.length > 0 && (
+              <InstancedRigidBodies
+                instances={ground.instances}
+                type="fixed"
+                colliders="cuboid"
+              >
+                <RenderInstance geo={t.geo} mat={t.mat} matrices={ground.matrices} />
+              </InstancedRigidBodies>
+            )}
+
+            {/* 2. Upper Levels - Visual Only */}
+            {upper.length > 0 && (
+              <RenderInstance geo={t.geo} mat={t.mat} matrices={upper} />
+            )}
+          </group>
+        )
+      })}
     </group>
   )
 }
