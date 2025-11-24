@@ -136,7 +136,7 @@ function RenderInstance({ geo, mat, matrices }: { geo: any; mat: any; matrices: 
     matrices.forEach((m, i) => meshRef.current!.setMatrixAt(i, m))
     meshRef.current.instanceMatrix.needsUpdate = true
   }, [matrices])
-  return <instancedMesh ref={meshRef} args={[geo, mat, matrices.length]} castShadow receiveShadow />
+  return <instancedMesh ref={meshRef} args={[geo, mat, matrices.length]} />
 }
 
 useGLTF.preload('/containers-transformed.glb')

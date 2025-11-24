@@ -1,9 +1,10 @@
 import * as THREE from 'three'
-import { useRef, useEffect, useMemo, type JSX } from 'react'
+import { useRef, useEffect, useMemo, useState, type JSX } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useGLTF, useKeyboardControls } from '@react-three/drei'
 import { RigidBody, useRapier, RapierRigidBody, CuboidCollider } from '@react-three/rapier'
 import { useControls } from 'leva'
+import { useCarRigStore } from '../../hooks/useCarRigStore'
 
 const WHEEL_SLOTS = [
   { id: 'front-left', label: 'Front Left', node: 'front-left', steering: false },
@@ -39,10 +40,10 @@ type WheelVisualMeta = {
 const AXES: Axis[] = ['x', 'y', 'z']
 const AXIS_INDEX: Record<Axis, number> = { x: 0, y: 1, z: 2 }
 const WHEEL_OFFSETS: Record<WheelSlot['id'], { x: number; y: number; z: number }> = {
-  'front-left': { x: 0.4, y: 0.106, z: 0.252 },
-  'front-right': { x: 0.4, y: 0.106, z: -0.252 },
-  'rear-left': { x: -0.52, y: 0.106, z: 0.252 },
-  'rear-right': { x: -0.52, y: 0.106, z: -0.252 },
+  'front-left': { x: 0.375, y: 0.106, z: 0.26 },
+  'front-right': { x: 0.375, y: 0.106, z: -0.26 },
+  'rear-left': { x: -0.55, y: 0.106, z: 0.25 },
+  'rear-right': { x: -0.55, y: 0.106, z: -0.25 },
 }
 const CHASSIS_ROTATION: [number, number, number] = [0, 0, 0]
 const WHEEL_ALIGNMENT_Y = Math.PI / 2
@@ -81,6 +82,10 @@ export default function Car(props: CarProps) {
   const { world } = useRapier()
   const chassisRef = useRef<RapierRigidBody>(null)
   const vehicleController = useRef<ReturnType<typeof world.createVehicleController> | null>(null)
+  const [controllerVersion, setControllerVersion] = useState(0)
+  const setCarBody = useCarRigStore(state => state.setCarBody)
+
+  const currentSteeringAng = useRef(0)
 
   const { nodes: carNodes, materials: carMaterials } = useGLTF('/car-transformed.glb') as unknown as CarGLTFResult
   const { nodes: wheelNodes, materials: wheelMaterials } = useGLTF('/wheels.glb') as unknown as WheelGLTFResult
@@ -107,19 +112,16 @@ export default function Car(props: CarProps) {
     useRef<THREE.Group>(null),
   ]
 
-  // Debug lines
-  const debugWheelsRef = [
-    useRef<THREE.Group>(null),
-    useRef<THREE.Group>(null),
-    useRef<THREE.Group>(null),
-    useRef<THREE.Group>(null),
-  ]
+  useEffect(() => {
+    setCarBody(chassisRef.current)
+    return () => setCarBody(null)
+  }, [setCarBody])
 
-  // --- LEVA CONTROLS ---
   const {
     engineForce,
     brakeForce,
     maxSteer,
+    steerSpeed,
     driveDir,
     // Suspension
     suspensionStiffness,
@@ -139,29 +141,30 @@ export default function Car(props: CarProps) {
   } = useControls('Car Config', {
     // Drive
     engineForce: { value: 1, min: 0, max: 500 },
-    brakeForce: { value: 0.01, min: 0, max: 50 },
-    driveDir: { value: -1, options: { Forward: 1, Backward: -1 }, label: 'Motor Direction' }, // Toggle this if W is backwards
+    brakeForce: { value: 0.005, min: 0, max: 50 },
+    driveDir: { value: -1, options: { Forward: 1, Backward: -1 }, label: 'Motor Direction' },
     maxSteer: { value: 0.5, min: 0.1, max: 1 },
+    steerSpeed: { value: 5, min: 1, max: 20, label: 'Steering Speed' }, // NEW
 
     // Suspension
     suspensionStiffness: { value: 50, min: 10, max: 100 },
     suspensionCompression: { value: 4, min: 0.1, max: 20, label: 'Compression Damping' },
-    suspensionRelaxation: { value: 2, min: 0.1, max: 20, label: 'Rebound Damping' },
-    suspensionRestLength: { value: 0.1, min: 0.05, max: 0.5 },
-    maxSuspensionTravel: { value: 0.3, min: 0.05, max: 0.6 },
+    suspensionRelaxation: { value: 5, min: 0.1, max: 20, label: 'Rebound Damping' },
+    suspensionRestLength: { value: 0.08, min: 0.05, max: 0.5 },
+    maxSuspensionTravel: { value: 0.5, min: 0.05, max: 0.6 },
     maxSuspensionForce: { value: 500, min: 50, max: 5000 },
-    wheelRadius: { value: 0.11, min: 0.05, max: 0.3 },
+    wheelRadius: { value: 0.125, min: 0.05, max: 0.3 },
     wheelWidth: { value: defaultWheelWidth, min: 0.03, max: 0.4, step: 0.005 },
 
     // Traction / Drift
-    frictionSlip: { value: 4, min: 0.1, max: 20, label: 'Forward Grip (Slip)' },
-    sideFriction: { value: 1.25, min: 0.1, max: 5, label: 'Side Grip' },
+    frictionSlip: { value: 40, min: 0.1, max: 40, label: 'Forward Grip (Slip)' },
+    sideFriction: { value: 1.5, min: 0.1, max: 5, label: 'Side Grip' },
 
-    // VISUAL FIXES - Use these to fix the "No Rotation" issue
+    // Visual Fixes
     meshRotateY: { value: 0, min: -180, max: 180, step: 1, label: 'Mesh Correction Y' },
-    visualAxis: { value: 'auto', options: ['auto', 'x', 'y', 'z'], label: 'Spin Axis' }, // 'auto' uses the detected axle axis
+    visualAxis: { value: 'auto', options: ['auto', 'x', 'y', 'z'], label: 'Spin Axis' },
 
-    debug: { value: true },
+    debug: { value: false },
   })
 
   // Physics Setup
@@ -178,6 +181,7 @@ export default function Car(props: CarProps) {
     })
 
     vehicleController.current = vehicle
+    setControllerVersion(version => version + 1)
 
     return () => {
       if (vehicleController.current) {
@@ -185,7 +189,35 @@ export default function Car(props: CarProps) {
         vehicleController.current = null
       }
     }
-  }, [world, suspensionRestLength, wheelRadius])
+  }, [world, suspensionRestLength, wheelRadius, wheelNodes])
+
+  useEffect(() => {
+    const vehicle = vehicleController.current
+    if (!vehicle) return
+
+    for (let i = 0; i < WHEEL_SLOTS.length; i++) {
+      vehicle.setWheelSuspensionStiffness(i, suspensionStiffness)
+      vehicle.setWheelSuspensionCompression?.(i, suspensionCompression)
+      vehicle.setWheelSuspensionRelaxation?.(i, suspensionRelaxation)
+      vehicle.setWheelMaxSuspensionForce?.(i, maxSuspensionForce)
+      vehicle.setWheelMaxSuspensionTravel?.(i, maxSuspensionTravel)
+      vehicle.setWheelSuspensionRestLength?.(i, suspensionRestLength)
+      vehicle.setWheelRadius?.(i, wheelRadius)
+      vehicle.setWheelFrictionSlip?.(i, frictionSlip)
+      vehicle.setWheelSideFrictionStiffness?.(i, sideFriction)
+    }
+  }, [
+    controllerVersion,
+    suspensionStiffness,
+    suspensionCompression,
+    suspensionRelaxation,
+    maxSuspensionForce,
+    maxSuspensionTravel,
+    suspensionRestLength,
+    wheelRadius,
+    frictionSlip,
+    sideFriction,
+  ])
 
   useEffect(() => {
     if (!debug) return
@@ -205,48 +237,40 @@ export default function Car(props: CarProps) {
   useFrame((_, delta) => {
     if (!vehicleController.current || !chassisRef.current) return
 
+    const fixedDelta = Math.min(delta, 1 / 60)
+
     const { forward, backward, left, right, brake } = getKeys()
     const vehicle = vehicleController.current
 
-    // 1. Update Suspension Live
-    for (let i = 0; i < WHEEL_SLOTS.length; i++) {
-      vehicle.setWheelSuspensionStiffness(i, suspensionStiffness)
-      vehicle.setWheelSuspensionCompression?.(i, suspensionCompression)
-      vehicle.setWheelSuspensionRelaxation?.(i, suspensionRelaxation)
-      vehicle.setWheelMaxSuspensionForce?.(i, maxSuspensionForce)
-      vehicle.setWheelMaxSuspensionTravel?.(i, maxSuspensionTravel)
-      vehicle.setWheelSuspensionRestLength?.(i, suspensionRestLength)
-      vehicle.setWheelRadius?.(i, wheelRadius)
-      vehicle.setWheelFrictionSlip?.(i, frictionSlip)
-      vehicle.setWheelSideFrictionStiffness?.(i, sideFriction)
-    }
-
-    // 2. Drive (AWD - All Wheels Powered to see rotation)
+    // 1. Drive
     const force = (forward ? engineForce : backward ? -engineForce : 0) * driveDir
-
     for (let i = 0; i < WHEEL_SLOTS.length; i++) {
       vehicle.setWheelEngineForce(i, force)
     }
 
-    // 3. Steer
-    const steer = left ? maxSteer : right ? -maxSteer : 0
+    // 2. Steer (Lerped)
+    const targetSteer = left ? maxSteer : right ? -maxSteer : 0
+
+    // Smoothly interpolate current steering towards target steering
+    currentSteeringAng.current = THREE.MathUtils.lerp(currentSteeringAng.current, targetSteer, steerSpeed * fixedDelta)
+
     WHEEL_SLOTS.forEach((slot, i) => {
-      vehicle.setWheelSteering(i, slot.steering ? steer : 0)
+      // Apply the smoothed angle only to steering wheels
+      vehicle.setWheelSteering(i, slot.steering ? currentSteeringAng.current : 0)
     })
 
-    // 4. Brake
+    // 3. Brake
     const b = brake ? brakeForce : 0
     for (let i = 0; i < WHEEL_SLOTS.length; i++) vehicle.setWheelBrake(i, b)
 
-    vehicle.updateVehicle(delta)
+    vehicle.updateVehicle(fixedDelta)
 
-    // 5. Sync Visuals
+    // 4. Sync Visuals
     const meshCorrectionRad = THREE.MathUtils.degToRad(meshRotateY)
     wheelsRef.forEach((ref, i) => {
       const wheelGroup = ref.current
       if (!wheelGroup) return
 
-      // Get Physics Data
       const connection = vehicle.wheelChassisConnectionPointCs(i)
       if (!connection) return
 
@@ -256,29 +280,17 @@ export default function Car(props: CarProps) {
       const steering = vehicle.wheelSteering(i) || 0
       const rotation = vehicle.wheelRotation(i) || 0
 
-      // Position + reset rotation
       wheelGroup.position.set(connection.x, connection.y - suspensionLen, connection.z)
       wheelGroup.rotation.set(0, 0, 0)
 
-      // Apply steering + baseline rotation so Blender's forward (Z-) matches Rapier forward (Z-)
       wheelGroup.rotateY(steering)
       wheelGroup.rotateY(WHEEL_ALIGNMENT_Y)
       wheelGroup.rotateY(meshCorrectionRad)
 
-      // Decide which axis should spin
       const resolvedAxis = visualAxis === 'auto' ? 'x' : visualAxis
       if (resolvedAxis === 'x') wheelGroup.rotateX(rotation)
       if (resolvedAxis === 'y') wheelGroup.rotateY(rotation)
       if (resolvedAxis === 'z') wheelGroup.rotateZ(rotation)
-
-      // Sync Debug Helpers + text overlays
-      if (debug) {
-        const dRef = debugWheelsRef[i].current
-        if (dRef) {
-          dRef.position.copy(wheelGroup.position)
-          dRef.quaternion.copy(wheelGroup.quaternion)
-        }
-      }
     })
   })
 
@@ -291,16 +303,18 @@ export default function Car(props: CarProps) {
         type="dynamic"
         position={[0, 2, 0]}
         rotation={CHASSIS_ROTATION}
-        mass={2500}
+        mass={3000}
         canSleep={false}
         friction={0.5}
+        linearDamping={0.5}
+        angularDamping={0.5}
       >
         <CuboidCollider args={[0.8, 0.2, 0.35]} position={[0, 0.22, 0]} />
 
         <mesh
           geometry={carNodes.Object_2.geometry}
           material={carMaterials['Scene_-_Root']}
-            position={[0, 0.22, 0]}
+          position={[0, 0.22, 0]}
           castShadow
         />
 
@@ -308,15 +322,23 @@ export default function Car(props: CarProps) {
         <group>
           {WHEEL_SLOTS.map((slot, i) => {
             const meta = wheelVisualMeta[i]
-            const correction = meta?.correction ?? [0, 0, 0]
-            const axisIndex = meta ? AXIS_INDEX[meta.thinAxis] : 0
-            const sourceWidth = meta ? meta.bbox.getComponent(axisIndex) : 1
-            const normalizedWidth = sourceWidth > 0 ? wheelWidth / sourceWidth : 1
-            const meshScale: [number, number, number] = [1, 1, 1]
-            meshScale[axisIndex] = normalizedWidth
-            const wheelMaterial =
-              wheelMaterials['Scene_-_Root.002'] ??
-              Object.values(wheelMaterials)[0]
+            if (!meta) return null
+
+            const correction = meta.correction
+            const axisIndex = AXIS_INDEX[meta.thinAxis]
+
+            const sourceWidth = meta.bbox.getComponent(axisIndex)
+            const widthScale = sourceWidth > 0 ? wheelWidth / sourceWidth : 1
+
+            const radiusAxisIndex = axisIndex === 0 ? 1 : 0
+            const sourceDiameter = meta.bbox.getComponent(radiusAxisIndex)
+            const radiusScale = sourceDiameter > 0 ? (wheelRadius * 2) / sourceDiameter : 1
+
+            const meshScale: [number, number, number] = [radiusScale, radiusScale, radiusScale]
+            meshScale[axisIndex] = widthScale
+
+            const wheelMaterial = wheelMaterials['Scene_-_Root.002'] ?? Object.values(wheelMaterials)[0]
+
             return (
               <group key={slot.id} ref={wheelsRef[i]}>
                 <mesh
@@ -332,7 +354,7 @@ export default function Car(props: CarProps) {
         </group>
 
         {/* Debug Wireframes */}
-        {debug &&
+        {/* {debug &&
           WHEEL_SLOTS.map((slot, i) => (
             <group key={`${slot.id}-debug`} ref={debugWheelsRef[i]}>
               <mesh rotation={[0, 0, Math.PI / 2]}>
@@ -341,7 +363,7 @@ export default function Car(props: CarProps) {
               </mesh>
               <axesHelper args={[0.5]} />
             </group>
-          ))}
+          ))} */}
       </RigidBody>
     </group>
   )

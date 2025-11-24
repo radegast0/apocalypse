@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 
 const floorLogic = `
@@ -116,13 +116,13 @@ export type RainSystemProps = {
   area?: number
 }
 
-export default function RainSystem(props: RainSystemProps = {}) {
-  const streaksRef = useRef<THREE.Mesh>(null)
-  const splashesRef = useRef<THREE.Mesh>(null)
+export default function RainSystem({ count, height, area }: RainSystemProps = {}) {
+  const streakMaterialRef = useRef<THREE.ShaderMaterial>(null)
+  const splashMaterialRef = useRef<THREE.ShaderMaterial>(null)
 
-  const finalCount = props.count ?? 10000
-  const finalHeight = props.height ?? 30
-  const finalArea = props.area ?? 70
+  const finalCount = count ?? 10000
+  const finalHeight = height ?? 30
+  const finalArea = area ?? 70
   const color = '#dbeafe'
   const opacity = 0.35
   const speed = 1.0
@@ -130,7 +130,6 @@ export default function RainSystem(props: RainSystemProps = {}) {
   const streakLength = 0.4
   const splashSize = 0.1
   const splashDuration = 3.0
- 
 
   const uniforms = useMemo(
     () => ({
@@ -141,7 +140,7 @@ export default function RainSystem(props: RainSystemProps = {}) {
       uOpacity: { value: opacity },
       uSize: { value: new THREE.Vector2(streakWidth, streakLength) },
       uSplashScale: { value: splashSize },
-      uSplashDuration: { value: splashDuration }
+      uSplashDuration: { value: splashDuration },
     }),
     [finalHeight, speed, color, opacity, streakWidth, streakLength, splashSize, splashDuration]
   )
@@ -180,33 +179,38 @@ export default function RainSystem(props: RainSystemProps = {}) {
     return geo
   }, [positions, speeds])
 
-  useFrame((_, delta) => {
-    if (streaksRef.current) {
-      const mat = streaksRef.current.material as THREE.ShaderMaterial
-      mat.uniforms.uTime.value += delta
-      mat.uniforms.uHeight.value = finalHeight
-      mat.uniforms.uSpeed.value = speed
-      mat.uniforms.uColor.value.set(color)
-      mat.uniforms.uOpacity.value = opacity
-      mat.uniforms.uSize.value.set(streakWidth, streakLength)
+  useEffect(() => {
+    const updateMaterialUniforms = (material: THREE.ShaderMaterial | null) => {
+      if (!material) return
+      const { uniforms: matUniforms } = material
+      matUniforms.uHeight.value = finalHeight
+      matUniforms.uSpeed.value = speed
+      matUniforms.uColor.value.set(color)
+      matUniforms.uOpacity.value = opacity
+      matUniforms.uSize?.value.set(streakWidth, streakLength)
+      if (matUniforms.uSplashScale) matUniforms.uSplashScale.value = splashSize
+      if (matUniforms.uSplashDuration) matUniforms.uSplashDuration.value = splashDuration
     }
 
-    if (splashesRef.current) {
-      const mat = splashesRef.current.material as THREE.ShaderMaterial
-      mat.uniforms.uTime.value += delta
-      mat.uniforms.uHeight.value = finalHeight
-      mat.uniforms.uSpeed.value = speed
-      mat.uniforms.uColor.value.set(color)
-      mat.uniforms.uOpacity.value = opacity
-      mat.uniforms.uSplashScale.value = splashSize
-      mat.uniforms.uSplashDuration.value = splashDuration
+    updateMaterialUniforms(streakMaterialRef.current)
+    updateMaterialUniforms(splashMaterialRef.current)
+  }, [color, finalHeight, opacity, speed, splashDuration, splashSize, streakLength, streakWidth])
+
+  useFrame((_, delta) => {
+    const advanceTime = (material: THREE.ShaderMaterial | null) => {
+      if (!material) return
+      material.uniforms.uTime.value += delta
     }
+
+    advanceTime(streakMaterialRef.current)
+    advanceTime(splashMaterialRef.current)
   })
 
   return (
     <>
-      <mesh ref={streaksRef} geometry={streakGeo} frustumCulled={false}>
+      <mesh geometry={streakGeo} frustumCulled={false}>
         <shaderMaterial
+          ref={streakMaterialRef}
           vertexShader={rainVertexShader}
           fragmentShader={rainFragmentShader}
           uniforms={uniforms}
@@ -215,8 +219,9 @@ export default function RainSystem(props: RainSystemProps = {}) {
           blending={THREE.AdditiveBlending}
         />
       </mesh>
-      <mesh ref={splashesRef} geometry={splashGeo} frustumCulled={false}>
+      <mesh geometry={splashGeo} frustumCulled={false}>
         <shaderMaterial
+          ref={splashMaterialRef}
           vertexShader={splashVertexShader}
           fragmentShader={splashFragmentShader}
           uniforms={uniforms}
