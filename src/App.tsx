@@ -17,6 +17,7 @@ const keyboardMap = [
   { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
   { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
   { name: 'brake', keys: ['Space'] },
+  { name: 'boost', keys: ['Shift'] },
 ]
 
 type HdriBackgroundProps = {

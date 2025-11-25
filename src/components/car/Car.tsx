@@ -242,13 +242,14 @@ export default function Car(props: CarProps) {
   useBeforePhysicsStep(world => {
     if (!vehicleController.current || !chassisRef.current) return
 
-    const { forward, backward, left, right, brake } = getKeys()
+    const { forward, backward, left, right, brake, boost } = getKeys()
     const vehicle = vehicleController.current
     const fixedDelta = world.integrationParameters.dt ?? 1 / 60
     const braking = Boolean(brake)
+    const activeEngineForce = boost ? 4 : engineForce
 
     // 1. Drive
-    const throttle = forward ? engineForce : backward ? engineForce * 0.5 : 0
+    const throttle = forward ? activeEngineForce : backward ? activeEngineForce * 0.5 : 0
     const direction = forward ? 1 : backward ? -1 : 0
     const force = braking ? 0 : throttle * direction * driveDir
     for (let i = 0; i < WHEEL_SLOTS.length; i++) {
@@ -324,6 +325,18 @@ export default function Car(props: CarProps) {
           position={[0, 0.22, 0]}
           castShadow
         />
+
+        {/* this is the flame on left side, the starting point of the flame is [-0.9, 0.33, 0.182] */}
+        <mesh position={[-1.65, 0.33, 0.182]}>
+          <boxGeometry args={[1.5, 0.01, 0.01]} />
+          <meshBasicMaterial color="blue" />
+        </mesh>
+
+        {/* this is the flame on right side , the starting point of the flame is [-0.9, 0.33, -0.182] */}
+        <mesh position={[-1.65, 0.33, -0.182]}>
+          <boxGeometry args={[1.5, 0.01, 0.01]} />
+          <meshBasicMaterial color="blue" />
+        </mesh>
 
         {/* Wheels - Direct Mesh Rendering */}
         <group>
